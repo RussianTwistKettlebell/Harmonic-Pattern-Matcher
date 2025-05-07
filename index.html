@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Harmonic Pattern Matcher</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    input[type="number"] { width: 80px; }
+    img { height: 40px; cursor: pointer; }
+    #modal {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.8); align-items: center; justify-content: center;
+    }
+    #modal img {
+      height: 500px;
+      max-width: 90%; max-height: 90%;
+      border: 5px solid white;
+      box-shadow: 0 0 10px #000;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Harmonic Pattern Matcher</h1>
+
+  <label>Margin: 
+    <select id="tolerance">
+      <option value="0.03">3%</option>
+      <option value="0.05">5%</option>
+    </select>
+  </label>
+
+  <div style="margin-bottom: 1em;"></div>
+
+  <div>
+    <label>X-B: <input type="number" step="0.001" id="xbInput"></label>
+    <label>A-C: <input type="number" step="0.001" id="acInput"></label>
+    <label>B-D: <input type="number" step="0.001" id="bdInput"></label>
+    <label>X-D: <input type="number" step="0.001" id="xdInput"></label>
+    <button onclick="filterData()">Search</button>
+    <button onclick="resetFilters()">Reset</button>
+  </div>
+
+  <table id="patternTable">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Pattern</th>
+        <th>X-B</th>
+        <th>A-C</th>
+        <th>B-D</th>
+        <th>X-D</th>
+        <th>Picture</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div id="modal">
+    <img id="modalImage" src="">
+  </div>
+
+  <script>
+    const patterns = [
+        {
+        "Type": "Formal",
+        "Pattern": "Gartley",
+        "X-B": "0.618",
+        "A-C": "0.382; 0.886",
+        "B-D": "1.13; 1.618",
+        "X-D": "0.786",
+        "Image": "Gartley.png"
+    },
+    {
+        "Type": "Formal",
+        "Pattern": "Bat",
+        "X-B": "0.382; 0.5",
+        "A-C": "0.382; 0.886",
+        "B-D": "1.618; 2.618",
+        "X-D": "0.886",
+        "Image": "Bat.png"
+    },
+    {
+        "Type": "Formal",
+        "Pattern": "Crab",
+        "X-B": "0.382; 0.618",
+        "A-C": "0.382; 0.886",
+        "B-D": "2.618; 3.618",
+        "X-D": "1.618",
+        "Image": "Crab.png"
+    },
+    {
+        "Type": "Formal",
+        "Pattern": "Deep Crab",
+        "X-B": "0.886",
+        "A-C": "0.382; 0.886",
+        "B-D": "2.0; 3.618",
+        "X-D": "1.618",
+        "Image": "Deep Crab.png"
+    },
+    {
+        "Type": "Formal",
+        "Pattern": "Alternate Bat",
+        "X-B": "0; 0.382",
+        "A-C": "0.382; 0.886",
+        "B-D": "2.0; 3.618",
+        "X-D": "1.13",
+        "Image": "Alternate Bat.png"
+    },
+    {
+        "Type": "Formal",
+        "Pattern": "Butterfly",
+        "X-B": "0.786",
+        "A-C": "0.382; 0.886",
+        "B-D": "1.618; 2.24",
+        "X-D": "1.27",
+        "Image": "Butterfly.png"
+    },
+    {
+        "Type": "Formal",
+        "Pattern": "Shark",
+        "X-B": "0.382; 0.618",
+        "A-C": "1.13; 1.618",
+        "B-D": "1.618; 2.24",
+        "X-D": "0.886; 1.13",
+        "Image": "Shark.png"
+    },
+    {
+        "Type": "Formal",
+        "Pattern": "5-0",
+        "X-B": "1.13; 1.618",
+        "A-C": "1.618; 2.24",
+        "B-D": "0.5",
+        "X-D": "",
+        "Image": "5-0.png"
+    },
+    {
+        "Type": "Informal",
+        "Pattern": "Max Bat",
+        "X-B": "0.382; 0.618",
+        "A-C": "0.382; 0.886",
+        "B-D": "1.272; 2.618",
+        "X-D": "0.886",
+        "Image": "Max Bat.png"
+    },
+    {
+        "Type": "Informal",
+        "Pattern": "Anti Bat",
+        "X-B": "0.382; 0.618",
+        "A-C": "1.128; 2.618",
+        "B-D": "2.00; 2.618",
+        "X-D": "1.128",
+        "Image": "Anti Bat.png"
+    },
+    {
+        "Type": "Informal",
+        "Pattern": "Butterfly 113",
+        "X-B": "0.786; 1.00",
+        "A-C": "0.618; 1.00",
+        "B-D": "1.128; 1.618",
+        "X-D": "1.128",
+        "Image": "Butterfly 113.png"
+    },
+    {
+        "Type": "Informal",
+        "Pattern": "Max Butterfly",
+        "X-B": "0.618; 0.886",
+        "A-C": "0.382; 0.886",
+        "B-D": "1.272; 2.618",
+        "X-D": "1.272; 1.618",
+        "Image": "Max Butterfly.png"
+    },
+    {
+        "Type": "Informal",
+        "Pattern": "Anti Butterfly",
+        "X-B": "0.382; 0.618",
+        "A-C": "1.12; 2.618",
+        "B-D": "1.272",
+        "X-D": "0.618; 0.786",
+        "Image": "Anti Butterfly.png"
+    },
+    {
+        "Type": "Informal",
+        "Pattern": "Anti Shark",
+        "X-B": "0.446; 0.618",
+        "A-C": "0.618; 0.886",
+        "B-D": "1.618; 2.618",
+        "X-D": "0.886; 1.128",
+        "Image": "Anti Shark.png"
+    },
+    {
+        "Type": "Informal",
+        "Pattern": "Nen Star",
+        "X-B": "0.382; 0.618",
+        "A-C": "1.414; 2.14",
+        "B-D": "1.272; 2.00",
+        "X-D": "1.272",
+        "Image": "Nen Star.png"
+    },
+    {
+        "Type": "Informal",
+        "Pattern": "Anti Nen Star",
+        "X-B": "0.50; 0.786",
+        "A-C": "0.467; 0.707",
+        "B-D": "1.618; 2.618",
+        "X-D": "0.786",
+        "Image": "Anti Nen Star.png"
+    },
+    {
+        "Type": "Informal",
+        "Pattern": "Navarro 200",
+        "X-B": "0.382; 0.786",
+        "A-C": "0.886; 1.128",
+        "B-D": "0.886; 3.618",
+        "X-D": "0.886; 1.128",
+        "Image": "Navarro 200.png"
+    },
+    {
+        "Type": "Informal",
+        "Pattern": "Anti Crab",
+        "X-B": "0.276; 0.446",
+        "A-C": "1.128; 2.618",
+        "B-D": "1.618; 2.618",
+        "X-D": "0.618",
+        "Image": "Anti Crab.png"
+    },
+    {
+        "Type": "Informal",
+        "Pattern": "Max Gartley",
+        "X-B": "0.382; 0.618",
+        "A-C": "0.382; 0.886",
+        "B-D": "1.128; 2.24",
+        "X-D": "0.618; 0.786",
+        "Image": "Max Gartley.png"
+    },
+    {
+        "Type": "Informal",
+        "Pattern": "Anti Gartley",
+        "X-B": "0.618; 0.786",
+        "A-C": "1.128; 2.618",
+        "B-D": "1.618",
+        "X-D": "1.272",
+        "Image": "Anti Gartley.png"
+    },
+    {
+        "Type": "Informal",
+        "Pattern": "Cypher",
+        "X-B": "0.382; 0.618",
+        "A-C": "1.272; 1.414",
+        "B-D": "1.272; 2.00",
+        "X-D": "0.786",
+        "Image": "Cypher.png"
+    },
+    {
+        "Type": "Informal",
+        "Pattern": "Anti Cypher",
+        "X-B": "0.50; 0.786",
+        "A-C": "0.467; 0.707",
+        "B-D": "1.618; 2.618",
+        "X-D": "1.272",
+        "Image": "Anti Cypher.png"
+    },
+    {
+        "Type": "Informal",
+        "Pattern": "New Cypher",
+        "X-B": "0.382; 0.618",
+        "A-C": "1.414; 2.14",
+        "B-D": "1.272; 2.00",
+        "X-D": "0.786",
+        "Image": "New Cypher.png"
+    },
+    {
+        "Type": "Informal",
+        "Pattern": "Leonardo",
+        "X-B": "0.50",
+        "A-C": "0.382; 0.886",
+        "B-D": "1.128; 2.618",
+        "X-D": "0.786",
+        "Image": "Leonardo.png"
+    },
+    {
+        "Type": "Informal",
+        "Pattern": "Seahorse",
+        "X-B": "0.382; 0.50",
+        "A-C": "1.618; 2.618",
+        "B-D": "1.00",
+        "X-D": "",
+        "Image": "Seahorse.png"
+    },
+    {
+        "Type": "Informal",
+        "Pattern": "White Swan",
+        "X-B": "0.382; 0.724",
+        "A-C": "2.00; 4.24",
+        "B-D": "0.50; 0.886",
+        "X-D": "0.382; 0.886",
+        "Image": "White Swan.png"
+    },
+    {
+        "Type": "Informal",
+        "Pattern": "Black Swan",
+        "X-B": "1.382; 2.618",
+        "A-C": "0.236; 0.50",
+        "B-D": "0.236; 0.50",
+        "X-D": "1.128; 2.618",
+        "Image": "Black Swan.png"
+    }
+    ];
+
+
+    function parseValues(cell) {
+      return cell.toString().split(";").map(s => parseFloat(s.trim().replace('<', ''))).filter(v => !isNaN(v));
+    }
+
+    function resetFilters() {
+      document.getElementById("xbInput").value = "";
+      document.getElementById("xdInput").value = "";
+      document.getElementById("acInput").value = "";
+      document.getElementById("bdInput").value = "";
+      renderTable(patterns);
+    }
+
+    function isWithinAbsoluteRange(value, target, tolerance) {
+      return value >= (target - tolerance) && value <= (target + tolerance);
+    }
+
+    function matchAny(value, targets, tolerance) {
+      return targets.some(target => isWithinAbsoluteRange(value, target, tolerance));
+    }
+
+    function matchRange(value, range, tolerance) {
+      if (range.length === 2) {
+        const min = range[0] - tolerance;
+        const max = range[1] + tolerance;
+        return value >= min && value <= max;
+      } else {
+        return matchAny(value, range, tolerance);
+      }
+    }
+
+    function filterData() {
+      const tolerance = parseFloat(document.getElementById("tolerance").value);
+      const xb = parseFloat(document.getElementById("xbInput").value);
+      const xd = parseFloat(document.getElementById("xdInput").value);
+      const ac = parseFloat(document.getElementById("acInput").value);
+      const bd = parseFloat(document.getElementById("bdInput").value);
+
+      const filtered = patterns.filter(row => {
+        try {
+          const xbVals = parseValues(row["X-B"]);
+          const xdVals = parseValues(row["X-D"]);
+          const acVals = parseValues(row["A-C"]);
+          const bdVals = parseValues(row["B-D"]);
+
+          const xbMatch = isNaN(xb) || matchAny(xb, xbVals, tolerance);
+          const xdMatch = isNaN(xd) || matchAny(xd, xdVals, tolerance);
+          const acMatch = isNaN(ac) || matchRange(ac, acVals, tolerance);
+          const bdMatch = isNaN(bd) || matchRange(bd, bdVals, tolerance);
+
+          return xbMatch && acMatch && bdMatch && xdMatch;
+        } catch {
+          return false;
+        }
+      });
+
+      renderTable(filtered);
+    }
+
+    function renderTable(data) {
+      const tbody = document.querySelector("#patternTable tbody");
+      tbody.innerHTML = "";
+      data.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${row.Type}</td>
+          <td>${row.Pattern}</td>
+          <td>${row["X-B"]}</td>
+          <td>${row["A-C"]}</td>
+          <td>${row["B-D"]}</td>
+          <td>${row["X-D"]}</td>
+          <td>${row.Image ? `<img src="${row.Image}" alt="${row.Pattern}">` : ''}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.addEventListener("click", function(e) {
+      if (e.target.tagName === "IMG" && e.target.src) {
+        const modal = document.getElementById("modal");
+        const modalImg = document.getElementById("modalImage");
+        modalImg.src = e.target.src;
+        modal.style.display = "flex";
+      }
+    });
+
+    document.getElementById("modal").addEventListener("click", function() {
+      this.style.display = "none";
+    });
+
+    renderTable(patterns);
+  </script>
+
+</body>
+</html>
