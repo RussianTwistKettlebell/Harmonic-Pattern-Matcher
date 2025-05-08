@@ -319,6 +319,8 @@
       document.getElementById("xdInput").value = "";
       document.getElementById("acInput").value = "";
       document.getElementById("bdInput").value = "";
+      document.getElementById("tolerance").value = "0.03";
+      document.getElementById("xbInput").focus();
       renderTable(patterns);
     }
 
@@ -399,6 +401,15 @@
       this.style.display = "none";
     });
 
+    ["xbInput", "acInput", "bdInput", "xdInput"].forEach(id => {
+      const input = document.getElementById(id);
+      input.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+          filterData();
+        }
+  });
+});
+    
     renderTable(patterns);
   </script>
 
