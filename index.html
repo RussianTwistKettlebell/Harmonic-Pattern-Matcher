@@ -46,13 +46,13 @@
   <table id="patternTable">
     <thead>
       <tr>
-        <th>Type</th>
-        <th>Pattern</th>
-        <th>X-B</th>
-        <th>A-C</th>
-        <th>B-D</th>
-        <th>X-D</th>
-        <th>Picture</th>
+        <th onclick="sortTable('type')">Type</th>
+        <th onclick="sortTable('pattern')">Pattern</th>
+        <th onclick="sortTable('xb')">X-B</th>
+        <th onclick="sortTable('ac')">A-C</th>
+        <th onclick="sortTable('bd')">B-D</th>
+        <th onclick="sortTable('xd')">X-D</th>
+        <th>Afbeelding</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -309,6 +309,34 @@
     }
     ];
 
+    let sortState = {
+      column: null,
+      ascending: true
+    };
+    
+    function sortTable(column) {
+      if (sortState.column === column) {
+        sortState.ascending = !sortState.ascending;
+      } else {
+        sortState.column = column;
+        sortState.ascending = true;
+      }
+    
+      const sortedData = [...currentFilteredData].sort((a, b) => {
+        const valA = a[column];
+        const valB = b[column];
+    
+        if (!isNaN(valA) && !isNaN(valB)) {
+          return sortState.ascending ? valA - valB : valB - valA;
+        } else {
+          return sortState.ascending
+            ? String(valA).localeCompare(String(valB))
+            : String(valB).localeCompare(String(valA));
+        }
+      });
+    
+      renderTable(sortedData);
+    }
 
     function parseValues(cell) {
       return cell.toString().split(";").map(s => parseFloat(s.trim().replace('<', ''))).filter(v => !isNaN(v));
