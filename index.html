@@ -309,6 +309,9 @@
     }
     ];
 
+
+    let currentFilteredData = [...patterns];
+    
     let sortState = {
       column: null,
       ascending: true
@@ -376,6 +379,7 @@
       const xd = parseFloat(document.getElementById("xdInput").value);
       const ac = parseFloat(document.getElementById("acInput").value);
       const bd = parseFloat(document.getElementById("bdInput").value);
+      currentFilteredData = filtered;
 
       const filtered = patterns.filter(row => {
         try {
