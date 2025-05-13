@@ -46,12 +46,12 @@
   <table id="patternTable">
     <thead>
       <tr>
-        <th onclick="sortTable('type')">Type</th>
-        <th onclick="sortTable('pattern')">Pattern</th>
-        <th onclick="sortTable('xb')">X-B</th>
-        <th onclick="sortTable('ac')">A-C</th>
-        <th onclick="sortTable('bd')">B-D</th>
-        <th onclick="sortTable('xd')">X-D</th>
+        <th onclick="sortTable('type')" data-column="type">Type <span></span></th>
+        <th onclick="sortTable('pattern')" data-column="pattern">Pattern <span></span></th>
+        <th onclick="sortTable('xb')" data-column="xb">X-B <span></span></th>
+        <th onclick="sortTable('ac')" data-column="ac">A-C <span></span></th>
+        <th onclick="sortTable('bd')" data-column="bd">B-D <span></span></th>
+        <th onclick="sortTable('xd')" data-column="xd">X-D <span></span></th>
         <th>Afbeelding</th>
       </tr>
     </thead>
@@ -317,13 +317,50 @@
       ascending: true
     };
     
-    function sortTable(column) {
-      if (sortState.column === column) {
-        sortState.ascending = !sortState.ascending;
-      } else {
-        sortState.column = column;
-        sortState.ascending = true;
-      }
+let sortState = {
+  column: null,
+  ascending: true
+};
+
+function sortTable(column) {
+  if (sortState.column === column) {
+    sortState.ascending = !sortState.ascending;
+  } else {
+    sortState.column = column;
+    sortState.ascending = true;
+  }
+
+  const sortedData = [...currentFilteredData].sort((a, b) => {
+    const valA = a[column];
+    const valB = b[column];
+
+    if (!isNaN(valA) && !isNaN(valB)) {
+      return sortState.ascending ? valA - valB : valB - valA;
+    } else {
+      return sortState.ascending
+        ? String(valA).localeCompare(String(valB))
+        : String(valB).localeCompare(String(valA));
+    }
+  });
+
+  updateSortIcons();
+  renderTable(sortedData);
+}
+
+
+function updateSortIcons() {
+  document.querySelectorAll("thead th").forEach(th => {
+    const span = th.querySelector("span");
+    if (!span) return;
+
+    const col = th.getAttribute("data-column");
+    if (col === sortState.column) {
+      span.textContent = sortState.ascending ? "▲" : "▼";
+    } else {
+      span.textContent = "";
+    }
+  });
+}
     
       const sortedData = [...currentFilteredData].sort((a, b) => {
         const valA = a[column];
