@@ -46,13 +46,13 @@
   <table id="patternTable">
     <thead>
       <tr>
-        <th onclick="sortTable('type')" data-column="type">Type <span></span></th>
-        <th onclick="sortTable('pattern')" data-column="pattern">Pattern <span></span></th>
-        <th onclick="sortTable('xb')" data-column="xb">X-B <span></span></th>
-        <th onclick="sortTable('ac')" data-column="ac">A-C <span></span></th>
-        <th onclick="sortTable('bd')" data-column="bd">B-D <span></span></th>
-        <th onclick="sortTable('xd')" data-column="xd">X-D <span></span></th>
-        <th>Afbeelding</th>
+        <th>Type</th>
+        <th>Pattern</th>
+        <th>X-B</th>
+        <th>A-C</th>
+        <th>B-D</th>
+        <th>X-D</th>
+        <th>Picture</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -310,74 +310,6 @@
     ];
 
 
-    let currentFilteredData = [...patterns];
-    
-    let sortState = {
-      column: null,
-      ascending: true
-    };
-    
-let sortState = {
-  column: null,
-  ascending: true
-};
-
-function sortTable(column) {
-  if (sortState.column === column) {
-    sortState.ascending = !sortState.ascending;
-  } else {
-    sortState.column = column;
-    sortState.ascending = true;
-  }
-
-  const sortedData = [...currentFilteredData].sort((a, b) => {
-    const valA = a[column];
-    const valB = b[column];
-
-    if (!isNaN(valA) && !isNaN(valB)) {
-      return sortState.ascending ? valA - valB : valB - valA;
-    } else {
-      return sortState.ascending
-        ? String(valA).localeCompare(String(valB))
-        : String(valB).localeCompare(String(valA));
-    }
-  });
-
-  updateSortIcons();
-  renderTable(sortedData);
-}
-
-
-function updateSortIcons() {
-  document.querySelectorAll("thead th").forEach(th => {
-    const span = th.querySelector("span");
-    if (!span) return;
-
-    const col = th.getAttribute("data-column");
-    if (col === sortState.column) {
-      span.textContent = sortState.ascending ? "▲" : "▼";
-    } else {
-      span.textContent = "";
-    }
-  });
-}
-    
-      const sortedData = [...currentFilteredData].sort((a, b) => {
-        const valA = a[column];
-        const valB = b[column];
-    
-        if (!isNaN(valA) && !isNaN(valB)) {
-          return sortState.ascending ? valA - valB : valB - valA;
-        } else {
-          return sortState.ascending
-            ? String(valA).localeCompare(String(valB))
-            : String(valB).localeCompare(String(valA));
-        }
-      });
-    
-      renderTable(sortedData);
-    }
-
     function parseValues(cell) {
       return cell.toString().split(";").map(s => parseFloat(s.trim().replace('<', ''))).filter(v => !isNaN(v));
     }
@@ -416,7 +348,6 @@ function updateSortIcons() {
       const xd = parseFloat(document.getElementById("xdInput").value);
       const ac = parseFloat(document.getElementById("acInput").value);
       const bd = parseFloat(document.getElementById("bdInput").value);
-      currentFilteredData = filtered;
 
       const filtered = patterns.filter(row => {
         try {
